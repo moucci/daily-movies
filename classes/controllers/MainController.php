@@ -31,17 +31,19 @@ class MainController extends Core
 
     /**
      * Methode to generate page
-     * @param string $view
+     * @param string $view name of view to load
+     * @param array $data data  pass to page
      * @return void
      */
-    protected function render(string $view): void
+    protected function render(string $view, array $data = []): void
     {
-        $data = (object)[
-            'path' => (!file_exists($view . ".php")) ? $view . ".php" : "notFound.php",
-            'title' => 'Titre de la page',
-        ];
+        $path = (!file_exists($view . ".php")) ? $view . ".php" : "notFound.php";
+        $data['path'] = $path;
+        $data = (object)$data;
 
+        // Inclure le template
         require_once "views/template.html.php";
+
     }
 
     /**

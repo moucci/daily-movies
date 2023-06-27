@@ -1,8 +1,4 @@
 <?php
-session_start();
-// à effacer
-$_SESSION['connected'] = 'true';
-//à effacer
 
 const DBHOST = "localhost";
 const DBUSER = "root";

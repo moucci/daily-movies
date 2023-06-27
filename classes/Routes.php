@@ -53,7 +53,7 @@ class Routes extends Core
      */
     public function canActivate(): bool|string
     {
-        return ($this->routes[$this->params[0]]) ? 'NEED_LOGIN' : true;
+        return ($this->routes[$this->params[0]] && !isset($_SESSION["is_connected"])) ? 'NEED_LOGIN' : true;
     }
 
     /**
