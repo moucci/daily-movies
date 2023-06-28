@@ -1,5 +1,4 @@
 <?php
-
 $listCats = [
     ["action", "/categories/action"],
     ["aventure", "/categories/aventure"],
@@ -22,6 +21,7 @@ $listCats = [
     ["historique", "/categories/historique"],
     ["guerre", "/categories/guerre"]
 ];
+
 ?>
 
 <header>
@@ -31,9 +31,7 @@ $listCats = [
                 <img class="d-inline-block align-text-top" width="50" height="50" src="public/assets/icons/logo.png" alt="">
             </a>
 
-            <h1 class=" navbar-brand fs-1 text-light ">
-                Daily movies
-            </h1>
+            <h1 class=" navbar-brand fs-1 text-light ">Daily Movies</h1>
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
