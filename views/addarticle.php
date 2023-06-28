@@ -11,7 +11,6 @@ function addarticle(object $db, int $user_id, string $title, string $content, st
     $query = "INSERT INTO `articles` (user_id, title, content, image, slug) VALUES (:user_id, :title, :content, :image, :slug)";
 
     $req = $db->prepare($query);
-
     
     $req->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $req->bindParam(':title', $title, PDO::PARAM_STR);

@@ -41,6 +41,9 @@ class MainController extends Core
         $data['path'] = $path;
         $data = (object)$data;
 
+        //get categories  for menu
+        $listCats = Categories::getAll() ;
+
         // Inclure le template
         require_once "views/template.html.php";
 

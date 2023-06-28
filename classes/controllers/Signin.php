@@ -6,7 +6,6 @@ use classes\Db;
 use PDO;
 use stdClass;
 
-
 class Signin extends MainController
 {
     protected string $email;

@@ -1,29 +1,9 @@
 <?php
-$listCats = [
-    ["action", "/categories/action"],
-    ["aventure", "/categories/aventure"],
-    ["animation", "/categories/animation"],
-    ["comédie", "/categories/comedie"],
-    ["comédie romantique", "/categories/comedie-romantique"],
-    ["crime", "/categories/crime"],
-    ["documentaire", "/categories/documentaire"],
-    ["drame", "/categories/drame"],
-    ["fantastique", "/categories/fantastique"],
-    ["horreur", "/categories/horreur"],
-    ["musical", "/categories/musical"],
-    ["mystère", "/categories/mystere"],
-    ["romance", "/categories/romance"],
-    ["science-fiction", "/categories/science-fiction"],
-    ["suspense", "/categories/suspense"],
-    ["thriller", "/categories/thriller"],
-    ["western", "/categories/western"],
-    ["biographie", "/categories/biographie"],
-    ["historique", "/categories/historique"],
-    ["guerre", "/categories/guerre"]
-];
-
+/**
+ * Value returned by  catégorieController
+ * @var TYPE_NAME $listCats
+ */
 ?>
-
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
@@ -43,7 +23,7 @@ $listCats = [
                     <?php $count = min(count($listCats), 6);
                     for ($i = 0; $i < $count; $i++): ?>
                         <li class="nav-item">
-                            <a class="btn btn-dark text-capitalize font-weight-bold" href="<?= $listCats[$i][1] ?>"><?= $listCats[$i][0] ?></a>
+                            <a class="btn btn-dark text-capitalize font-weight-bold" href="<?= $listCats[$i]->slug ?>"><?= $listCats[$i]->name ?></a>
                         </li>
                     <?php endfor; ?>
 
@@ -54,7 +34,7 @@ $listCats = [
                             </a>
                             <div class="dropdown-menu dropdown-menu-end  border-0 dropdown-menu-dark bg-dark" aria-labelledby="navbarDropdown">
                                 <?php for ($i = 6; $i < count($listCats); $i++): ?>
-                                    <a class="dropdown-item text-capitalize font-weight-bold" href="<?= $listCats[$i][1] ?>"><?= $listCats[$i][0] ?></a>
+                                    <a class="dropdown-item text-capitalize font-weight-bold" href="<?= $listCats[$i]->slug ?>"><?= $listCats[$i]->name ?></a>
                                 <?php endfor; ?>
                             </div>
                         </li>
