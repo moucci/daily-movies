@@ -18,7 +18,7 @@ class Routes extends Core
         "inscription" => false
     ];
 
-    private array $params = [];
+    private static array $params = [];
 
 
     /**
@@ -27,14 +27,14 @@ class Routes extends Core
     public function __construct()
     {
         //explode  url
-        $this->params = explode('/', str_replace(' ', '+', $_GET["url"]));
+        self::$params = explode('/', str_replace(' ', '+', $_GET["url"]));
 
         //convert camelCase
-        $this->params[0] = Core::dashesToCamelCase($this->params[0]);
+        self::$params[0] = Core::dashesToCamelCase(self::$params[0]);
 
         //if route empty
         //det by default home
-        if (strlen($this->params[0]) === 0) $this->params[0] = 'home';
+        if (strlen(self::$params[0]) === 0) self::$params[0] = 'home';
     }
 
 
@@ -44,7 +44,7 @@ class Routes extends Core
      */
     public function checkRoute(): bool|string
     {
-        return (!array_key_exists($this->params[0], $this->routes)) ? 'NOT_FOUND' : true;
+        return (!array_key_exists(self::$params[0], $this->routes)) ? 'NOT_FOUND' : true;
     }
 
     /**
@@ -53,7 +53,7 @@ class Routes extends Core
      */
     public function canActivate(): bool|string
     {
-        return ($this->routes[$this->params[0]] && !isset($_SESSION["is_connected"])) ? 'NEED_LOGIN' : true;
+        return ($this->routes[self::$params[0]] && !isset($_SESSION["is_connected"])) ? 'NEED_LOGIN' : true;
     }
 
     /**
@@ -62,8 +62,19 @@ class Routes extends Core
      */
     public function getRoute(): string
     {
-        return $this->params[0];
+        return self::$params[0];
     }
+
+     /**
+     * Methode to return params in route 
+     * @return array
+     */
+    public static function getParams(): array
+    {
+        return  self::$params ;
+    }
+
+
 
 
 }
