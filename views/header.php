@@ -3,12 +3,18 @@
  * Value returned by  catégorieController
  * @var TYPE_NAME $listCats
  */
+//echo "<pre>" ;
+//var_dump($_SESSION);
+//echo "</pre>" ;
+
+
+
 ?>
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="#">
-                <img class="d-inline-block align-text-top" width="50" height="50" src="public/assets/icons/logo.png" alt="">
+            <a class="navbar-brand" href="/home">
+                <img class="d-inline-block align-text-top" width="50" height="50" src="/public/assets/icons/logo.png" alt="">
             </a>
 
             <h1 class=" navbar-brand fs-1 text-light ">Daily Movies</h1>
@@ -18,7 +24,7 @@
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="btn btn-dark text-capitalize font-weight-bold" href="#">Accueil</a>
+                        <a class="btn btn-dark text-capitalize font-weight-bold" href="/home">Accueil</a>
                     </li>
                     <?php $count = min(count($listCats), 6);
                     for ($i = 0; $i < $count; $i++): ?>

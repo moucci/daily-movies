@@ -8,14 +8,11 @@ use classes\Db;
 
 $db = Db::getDb();
 
-
 $query = "SELECT * FROM `articles`";
 
 $req = $db->query($query);
 
 $articles = $req->fetchAll(PDO::FETCH_ASSOC);
-
-
 
 //on récupère les catégories
 $query = "SELECT * FROM `categories`";
@@ -23,8 +20,6 @@ $query = "SELECT * FROM `categories`";
 $req = $db->query($query);
 
 $categories = $req->fetchAll(PDO::FETCH_ASSOC);
-
-
 
 //ajout d'un article
 $erreurs = [];
@@ -120,7 +115,7 @@ endif;
                     <label for="categories">Ajouter une catégorie (pour choisir plusieurs catégories maintenez 'ctrl' au moment du click)</label>
 
                     <select name="categories[]" id="categories" class="text-center" multiple size="2">
-                        
+
                         <?php foreach ($categories as $categorie) : ?>
 
                             <option value="<?= $categorie['id'] ?>"><?= $categorie['name'] ?></option>

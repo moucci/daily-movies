@@ -16,7 +16,7 @@ class Categories extends MainController
     {
         //GET DB CONNEXION
         $db = Db::getDb();
-        $req = $db->query("SELECT id ,  name as name   FROM categories");
+        $req = $db->query("SELECT id ,  name as name , slug   FROM categories");
         $categories = $req->fetchAll(PDO::FETCH_OBJ);
         $totalResults = $req->rowCount();
         $req->closeCursor();
