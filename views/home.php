@@ -11,7 +11,6 @@ use classes\Routes ;
 //get number of page
 $nPage = (int) (Routes::getParams()[1] ?? 1 ) ;
 
-//Core::var_dump_pre($data);
 ?>
 
 <section id="home-slide">

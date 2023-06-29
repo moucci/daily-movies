@@ -37,6 +37,9 @@ class MainController extends Core
      */
     protected function render(string $view, array $data = []): void
     {
+
+
+
         $path = (!file_exists($view . ".php")) ? $view . ".php" : "notFound.php";
         $data['path'] = $path;
         $data = (object)$data;
@@ -74,6 +77,14 @@ class MainController extends Core
     private function home(): Home
     {
         return new Home();
+    }
+    /**
+     * return  page article
+     * @return Articles
+     */
+    private function article(): Articles
+    {
+        return new Articles();
     }
 
     /**
