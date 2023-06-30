@@ -126,6 +126,7 @@ class Signup extends MainController
             //set session
             $_SESSION['is_connected'] = true;
             $_SESSION['name'] = $nom;
+            $_SESSION['prenom'] = $prenom;
             $_SESSION['id'] = $db->lastInsertId();
             return true;
         } catch (PDOException $error) {

@@ -15,7 +15,7 @@ class Home extends MainController
         //render page
         MainController::render("home", [
             "title" => "Bienvenue sur Daily Movies",
-            "items" => Articles::getAll($nPage ,4)
+            "items" => Articles::getAll($nPage ,7)
         ]);
     }
 }

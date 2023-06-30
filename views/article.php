@@ -7,8 +7,6 @@ use classes\Config;
  */
 
 ?>
-
-
 <section>
     <div class="container mt-5">
         <div class="row">
@@ -22,13 +20,10 @@ use classes\Config;
         </div>
     </div>
 
-
     <div class="container">
-
         <?php foreach ($data->article->cats as $value): ?>
             <a href="/categories/<?= $value?>" class="btn m-1 btn-dark">#<?= $value?></a>
         <?php endforeach;?>
-
     </div>
 
 </section>

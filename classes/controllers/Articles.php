@@ -150,4 +150,80 @@ class Articles extends MainController
     }
 
 
+
+    /**
+     * methode to get article by categorie
+     * @param string $categorie
+     * @param int $page
+     * @param int $limit
+     * @param int $offset
+     * @return array|array[]
+     */
+    public static function getAllByCategorie(string $categorie ,int $page = 1, int $limit = 6, int $offset = 0): array
+    {
+        //GET DB CONNEXION
+        $db = Db::getDb();
+
+        //get data from table
+        $query = "SELECT SQL_CALC_FOUND_ROWS
+                    art.id,
+                    art.title,
+                    art.content,
+                    art.slug,
+                    art.image,
+                    DATE_FORMAT(art.date_creation, '%d %b %Y') AS date_creation,
+                    usr.nom,
+                    usr.prenom,
+                    GROUP_CONCAT( cat.name) AS categories
+                    FROM articles AS art
+                    LEFT JOIN users AS usr ON usr.id = art.user_id
+                    LEFT JOIN article_categories AS art_cat ON art_cat.article_id = art.id
+                    LEFT JOIN categories AS cat ON cat.id = art_cat.categorie_id
+                    WHERE cat.name = :categorie 
+                    GROUP BY art.id limit :limit offset :offset ;
+                    ";
+        //prepare query
+        $req = $db->prepare($query);
+        $req->bindParam(':categorie', $categorie , PDO::PARAM_STR );
+
+        //bind value
+        $req->bindParam(':limit', $limit, PDO::PARAM_INT);
+
+        //get pagination
+        $offset = ( $page - 1 ) * $limit;
+        $req->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+        //execute
+        if (!$req->execute()) {
+            return [
+                "erreur" => $req->errorInfo(),
+            ];
+        }
+
+        //fetch data
+        $articles = $req->fetchAll(PDO::FETCH_OBJ);
+
+        //format cats
+        if (isset($articles->cats)) $articles->cats = explode(',', $articles->cats);
+
+        //get nomber of resulta
+        $totalRowsResult = $db->query("SELECT FOUND_ROWS()");
+        $totalRows = (int)$totalRowsResult->fetchColumn();
+
+        //generate pagination
+        for ($page = 1; $page < ceil($totalRows / $limit); $page++) $pages[] = $page;
+
+        //return results
+        return [
+            "articles" => ($req->rowCount() === 0) ? [] : $articles,
+            "pages" => $pages ?? [],
+
+        ];
+
+    }
+
+
+
+
+
 }

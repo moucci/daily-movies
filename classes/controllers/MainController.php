@@ -39,13 +39,12 @@ class MainController extends Core
     {
 
 
-
         $path = (!file_exists($view . ".php")) ? $view . ".php" : "notFound.php";
         $data['path'] = $path;
         $data = (object)$data;
 
         //get categories  for menu
-        $listCats = Categories::getAll() ;
+        $listCats = Categories::getAll();
 
         // Inclure le template
         require_once "views/template.html.php";
@@ -71,6 +70,23 @@ class MainController extends Core
     }
 
     /**
+     * Methode to logout user
+     * @return void
+     */
+    private function logout():void
+    {
+
+        //destroy session
+        session_destroy();
+
+        header('Location: /home');
+
+        die;
+
+    }
+
+
+    /**
      * return  page home
      * @return Home
      */
@@ -78,6 +94,7 @@ class MainController extends Core
     {
         return new Home();
     }
+
     /**
      * return  page article
      * @return Articles
@@ -88,6 +105,15 @@ class MainController extends Core
     }
 
     /**
+     * return  page with artiles by categories
+     * @return Categories
+     */
+    private function categories(): Categories
+    {
+        return new Categories();
+    }
+
+    /**
      * return page gestions
      * @return Gestions
      */
@@ -95,5 +121,6 @@ class MainController extends Core
     {
         return new Gestions();
     }
+
 
 }

@@ -81,7 +81,7 @@ class Signin extends MainController
         //GET DB CONNEXION
         $db = Db::getDb();
 
-        $req = $db->prepare('SELECT id ,  nom as name , email , mdp as mdp_hashed FROM users  where email = :email');
+        $req = $db->prepare('SELECT id ,  nom as name ,prenom ,  email , mdp as mdp_hashed FROM users  where email = :email');
         $req->bindParam(':email', $this->email, PDO::PARAM_STR);
 
         ////try to get users by may
@@ -99,6 +99,7 @@ class Signin extends MainController
         //set session
         $_SESSION['is_connected'] = true;
         $_SESSION['name'] = $data->name;
+        $_SESSION['prenom'] = $data->prenom;
         $_SESSION['id'] = $data->id;
 
         return true;

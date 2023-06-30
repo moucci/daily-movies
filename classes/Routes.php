@@ -13,8 +13,10 @@ class Routes extends Core
     private array $routes = [
         "home" => false,
         "article" => false,
+        "categories" => false,
         "gestions" => true,
         "connexion" => false,
+        "logout" => true ,
         "inscription" => false
     ];
 

@@ -92,7 +92,7 @@ $nPage = (int) (Routes::getParams()[1] ?? 1 ) ;
                     <a class="page-link " href="/home/<?= $page ?>"><?= $page ?></a>
                 </li>
             <?php endforeach; ?>
-            <?php if(count($data->items["pages"]) !== $nPage ):?>
+            <?php if(count($data->items["pages"]) > $nPage  && $nPage >=1 ):?>
                 <li class="page-item"><a class="page-link" href="/home/<?= $nPage + 1 ?>">Suivant</a></li>
             <?php endif?>
         </ul>
