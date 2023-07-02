@@ -2,6 +2,9 @@
 
 namespace classes;
 
+use classes\controllers\Articles;
+use PDO;
+
 class Core
 {
 
@@ -129,12 +132,12 @@ class Core
         // Check the extension
         $extension = strtolower(pathinfo($imageName, PATHINFO_EXTENSION));
         if (!in_array($extension, $allowedExtensions)) {
-            return "Format de l'image non autorisé (jpg, jpeg, png)." ;
+            return "Format de l'image non autorisé (jpg, jpeg, png).";
         }
 
         // Check the MIME type
         if (!in_array($imageType, $allowedMimeTypes)) {
-            return"Type MIME de l'image non autorisé." ;
+            return "Type MIME de l'image non autorisé.";
         }
         //max sise allowed 9mo
         $maxSize = 9 * 1024 * 1024;
@@ -165,7 +168,7 @@ class Core
     public static function saveImage(string      $nameVarFiles,
                                      string      $pathFolderDest,
                                      string      $typeImg = 'FULL' | 'SQUARE',
-                                     string|null $nameImage = null ): array
+                                     string|null $nameImage = null): array
     {
         //basic check file
         $image = $_FILES[$nameVarFiles] ?? null;

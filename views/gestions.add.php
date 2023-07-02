@@ -2,20 +2,20 @@
 
 use classes\Config;
 
-
-
-if (isset($_POST['edit'])):?>
-    <div class="container ">
-
-        <h1 class="m-5 text-center"><?= htmlspecialchars($_POST['title']) ?></h1>
-        <img src="<?= Config::PATCH_IMG_FULL . $_POST['file'] ?>"
+if (isset($_POST['file'])):?>
+    <div class="container  my-4">
+        <img src="<?= Config::PATCH_IMG_FULL . htmlspecialchars($_POST['file']) ?>"
              class=" w-50  d-block m-auto  rounded " alt="...">
-
     </div>
 <?php endif; ?>
 <form class="container-fluid position-relative m-auto mt-3" style="max-width: 700px" method="POST"
       enctype="multipart/form-data">
     <div class="d-flex flex-column">
+        <?php if (isset($_POST['file'])): ?>
+            <div class="container ">
+                <input type="hidden" name="file" value="<?= htmlspecialchars($_POST['file']) ?>">
+            </div>
+        <?php endif; ?>
         <div class="form-input">
             <?php if (isset($data->response["erreurs"]->title)) : ?>
                 <span class=" my-3 d-block text-danger"><?= $data->response["erreurs"]->title ?></span>
@@ -100,7 +100,7 @@ if (isset($_POST['edit'])):?>
                 <span class="text-danger"><?= $erreurs['autre'] ?></span>
             <?php endif; ?>
 
-            <button style="width: 200px"
+            <button aria-label="envoyer le formulaire" style="width: 200px"
                     class="my-2 m-auto d-block  btn btn-success text-center border border-secondary rounded-pill">
                 Envoyer
             </button>

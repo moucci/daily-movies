@@ -38,10 +38,9 @@ $nPage = (int)(Routes::getParams()[1] ?? 1);
                             <h4 class="card-title fst-italic d-flex justify-content-between   text-capitalize">
                                 <a class="text-decoration-none"
                                    href="/article/<?= $article->id . '/' . $article->slug ?>">
-                                    <?= $article->title ?>
+                                    <?= substr($article->title , 0 ,25 )?>
                                 </a>
-                                <a href="gestions/edit/<?= $article->id ?>" class="btn fw-bold btn-primary">Editer</a>
-
+                                <a href="/gestions/edit/<?= $article->id ?>" class="btn fw-bold btn-primary">Editer</a>
                             </h4>
 
 <!--                            <p class="card-text text-wrap fw-bold ">-->

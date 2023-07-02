@@ -6,6 +6,7 @@ use classes\Core;
 use classes\Db;
 use classes\Routes;
 use PDO;
+use PDOException;
 
 
 class Categories extends MainController
@@ -21,7 +22,7 @@ class Categories extends MainController
 
         //get number of page in url
         $nPage = Routes::getParams()[2] ?? 1;
-        $nPage = is_numeric($nPage) ? $nPage : 1 ;
+        $nPage = is_numeric($nPage) ? $nPage : 1;
 
         //check  params
         if (empty($this->categorie)) {
@@ -31,12 +32,12 @@ class Categories extends MainController
             die;
         }
         //get data
-        $data = Articles::getAllByCategorie($this->categorie , $nPage, 6);
+        $data = Articles::getAllByCategorie($this->categorie, $nPage, 6);
 
         //check data
 //        $title = (isset($data["articles"][0]->title)) ? '$data["articles"][0]->title' : htmlspecialchars($this->categorie);
         MainController::render("categories", [
-            "title" => "Liste des article dans la catégorie ".htmlspecialchars($this->categorie)." | Daily Movies",
+            "title" => "Liste des article dans la catégorie " . htmlspecialchars($this->categorie) . " | Daily Movies",
             "items" => $data
         ]);
     }
@@ -54,6 +55,75 @@ class Categories extends MainController
         $totalResults = $req->rowCount();
         $req->closeCursor();
         return $totalResults == 0 ? [] : $categories;
+    }
+
+    /**
+     * Methode to add categorie  for article
+     * @param array $newCats
+     * @param int $idArticle
+     * @return bool|string
+     */
+    public static function setArticleCategories(array $newCats, int $idArticle): bool|string
+    {
+
+        //check if categorie is not empty
+        if (empty($newCats)) return true;
+
+        $db = Db::getDb();
+        //insert list of car
+        try {
+            $qInsertCat = "INSERT INTO article_categories (article_id, categorie_id) VALUES (:article_id, :categorie_id)";
+            //start transaction
+            $db->beginTransaction();
+            $req = $db->prepare($qInsertCat);
+            // bind value and execute query
+            foreach ($newCats as $idCat) {
+                $req->bindParam(':article_id', $idArticle, PDO::PARAM_INT);
+                $req->bindParam(':categorie_id', $idCat, PDO::PARAM_INT);
+                $req->execute();
+            }
+            // end transaction
+            $db->commit();
+            return true;
+        } catch (PDOException $error) {
+            return $error->getMessage();
+        }
+    }
+
+    /**
+     * Methode to remove categorie for article
+     * @param array $oldCtas
+     * @param int $idArticle
+     * @return bool|string
+     */
+    public static function unSetArticleCategories(array $oldCtas, int $idArticle): bool|string
+    {
+
+        //check if categorie is not empty
+        if (empty($oldCtas)) return true ;
+
+        $db = Db::getDb();
+
+        //insert list of car
+        try {
+            $qInsertCat = "DELETE FROM article_categories WHERE  article_id = :article_id and  categorie_id = :categorie_id";
+            //start transaction
+            $db->beginTransaction();
+            $req = $db->prepare($qInsertCat);
+
+            // bind value and execute query
+            foreach ($oldCtas as $idCat) {
+                $req->bindParam(':article_id', $idArticle, PDO::PARAM_INT);
+                $req->bindParam(':categorie_id', $idCat, PDO::PARAM_INT);
+                $req->execute();
+            }
+
+            // end transaction
+            $db->commit();
+            return true;
+        } catch (PDOException $error) {
+            return $error->getMessage();
+        }
     }
 
 }

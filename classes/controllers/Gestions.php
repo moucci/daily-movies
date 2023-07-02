@@ -19,7 +19,10 @@ class Gestions extends MainController
                 $this->editArticle();
                 break;
             case "new":
-                $this->newArticle() ;
+                $this->newArticle();
+                break;
+            case "categories":
+                $this->newCategories();
                 break;
             default:
                 // Get number of page in URL
@@ -39,7 +42,8 @@ class Gestions extends MainController
      * Route new article
      * @return void
      */
-    private    function  newArticle(){
+    private function newArticle()
+    {
         // Add a new article
         $articleResponse = Articles::addArticle($_POST);
         if ($articleResponse['process']) {
@@ -58,7 +62,8 @@ class Gestions extends MainController
      * Route edit Article
      * @return void|null
      */
-    private   function  editArticle(){
+    private function editArticle()
+    {
 
 
         // Get the article ID from the URL parameters
@@ -70,33 +75,32 @@ class Gestions extends MainController
         }
 
         // Get the article data by ID
-        $articleUpdateResponse = Articles::getById($idArticle);
+        $articleResponse = Articles::getById($idArticle);
 
         // Check if the article exists
-        if (!$articleUpdateResponse['article']->title) {
+        if (!$articleResponse['article']->title) {
             return header('Location: /notFound');
         }
 
         // get categoroe in  allowed
-        $categories = Categories::getAll() ;
+        $categories = Categories::getAll();
 
         // Get the list of categories for the article
-        $listCats = explode(',', $articleUpdateResponse['article']->idCats);
-
-
+        $listCats = explode(',', $articleResponse['article']->idCats ?? '');
 
         // Check if $_POST is empty
-        if (empty($_POST)) {
-            $_POST['categories'] = $listCats;
+        if (empty($_POST) && empty($_FILES['image']['name'])) {
             // Set $_POST with the article data for updating
-            $_POST["title"] = $articleUpdateResponse['article']->title;
-            $_POST["slug"] = $articleUpdateResponse['article']->slug;
-            $_POST["content"] = $articleUpdateResponse['article']->content;
-            $_POST["file"] = $articleUpdateResponse['article']->image;
+            $_POST["title"] = $articleResponse['article']->title;
+            $_POST["slug"] = $articleResponse['article']->slug;
+            $_POST["content"] = $articleResponse['article']->content;
+            $_POST["file"] = $articleResponse['article']->image;
+            //bind categorie
+            $_POST['categories'] = $listCats;
             $_POST["edit"] = true;
 
             //add catergorie to response
-            $articleUpdateResponse["categories"] = $categories ;
+            $articleUpdateResponse["categories"] = $categories;
 
             // Render the view with the response
             MainController::render('gestions.add', [
@@ -106,25 +110,43 @@ class Gestions extends MainController
             die();
         }
 
-
-
         // Update the article
-        $articleUpdateResponse = Articles::updateArticle($_POST , $idArticle);
+        $articleUpdateResponse = Articles::updateArticle($_POST, (array)$articleResponse['article']);
 
         if ($articleUpdateResponse['process']) {
-            header('Location: /article/'.$idArticle);
+            header('Location: /article/' . $idArticle);
         } else {
             //add catergorie to response
-            $articleUpdateResponse["categories"] = $categories ;
+            $articleUpdateResponse["categories"] = $categories;
             // Render the view with the response
             MainController::render('gestions.add', [
-                "title" => "Ajouter un article | Daily Movies",
+                "title" => "2 Mettre à jour  un article | Daily Movies",
                 "response" => $articleUpdateResponse
             ]);
             die;
         }
 
     }
+
+
+    private function newCategories(){
+
+        // Check if $_POST is empty
+        if (empty($_POST)) {
+            MainController::render('gestions.categories' , [
+                "title"=> "Ajouter ou supprimer une categorie | Daily Movies ",
+                "categories" => Categories::getAll()
+            ]);
+        }else{
+            MainController::render('gestions.categories' , [
+                "title"=> "Ajouter ou supprimer une categorie | Daily Movies ",
+                "categories" => Categories::getAll()
+            ]);
+        }
+
+
+    }
+
 
 
     /**
@@ -219,7 +241,6 @@ class Gestions extends MainController
         $req->closeCursor();
     }
 
-
     public static function slugify($text, string $divider = '-')
     {
         // replace non letter or digits by divider
@@ -247,93 +268,6 @@ class Gestions extends MainController
         return $text;
     }
 
-    /**
-     * $db -> object
-     * $img -> la nouvelle image
-     * $idarticle -> l'id de l'article
-     */
-    public static function modifimg(object $db, string $img, int $idarticle)
-    {
-        $query = "UPDATE `articles` SET `image` = :img WHERE `id` = :id";
 
-        $req = $db->prepare($query);
-
-        $req->bindParam(':img', $img, PDO::PARAM_STR);
-        $req->bindParam(':id', $idarticle, PDO::PARAM_INT);
-
-
-        try {
-            $req->execute();
-            return [
-                'process' => true,
-                'message' => 'L\'image a bien été modifiée.',
-            ];
-        } catch (PDOException $error) {
-            return [
-                'process' => false,
-                'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
-            ];
-        }
-    }
-
-
-    /**
-     * $db -> object
-     * $modiftitle -> le nouveau titre
-     * $idarticle -> l'id de l'article
-     */
-    public static function modiftitle(object $db, string $modiftitle, int $idarticle)
-    {
-        $query = "UPDATE `articles` SET `title` = :title WHERE `id` = :id";
-
-        $req = $db->prepare($query);
-
-        $req->bindParam(':title', $modiftitle, PDO::PARAM_STR);
-        $req->bindParam(':id', $idarticle, PDO::PARAM_INT);
-
-
-        try {
-            $req->execute();
-            return [
-                'process' => true,
-                'message' => 'Le titre a bien été modifié.',
-            ];
-        } catch (PDOException $error) {
-            return [
-                'process' => false,
-                'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
-            ];
-        }
-    }
-
-
-    /**
-     * $db -> object
-     * $modifcontent -> le nouveau titre
-     * $idarticle -> l'id de l'article
-     */
-    public static function modifcontent(object $db, string $modifcontent, int $idarticle)
-    {
-        $query = "UPDATE `articles` SET `content` = :content WHERE `id` = :id";
-
-        $req = $db->prepare($query);
-
-        $req->bindParam(':content', $modifcontent, PDO::PARAM_STR);
-        $req->bindParam(':id', $idarticle, PDO::PARAM_INT);
-
-
-        try {
-            $req->execute();
-            return [
-                'process' => true,
-                'message' => 'Le contenu a bien été modifié.',
-            ];
-        } catch (PDOException $error) {
-            return [
-                'process' => false,
-                'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
-            ];
-        }
-    }
 
 }

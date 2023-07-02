@@ -7,13 +7,13 @@
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <a class="navbar-brand" href="/home">
+            <a class="navbar-brand" aria-label="Revenir à la page d'acceuil"  href="/home">
                 <img class="d-inline-block align-text-top" width="50" height="50" src="/public/assets/icons/logo.png"
                      alt="">
             </a>
 
             <h1 class=" navbar-brand fs-1 text-light ">Daily Movies</h1>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button aria-label="menu" class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse align-items-center justify-content-end" id="navbarNav">

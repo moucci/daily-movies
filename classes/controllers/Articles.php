@@ -6,6 +6,7 @@ use classes\Config;
 use classes\Core;
 use classes\Db;
 use classes\Routes;
+use Exception;
 use PDO;
 use function Sodium\add;
 
@@ -228,10 +229,12 @@ class Articles extends MainController
     }
 
     /**
-     * @param $idArticle
+     * Methode to update article
+     * @param array $data new data
+     * @param array $oldData old data
      * @return array|void
      */
-    public static function updateArticle(array $data, int $idArticle)
+    public static function updateArticle(array $data, array $oldData)
     {
 
         //if no data
@@ -250,11 +253,100 @@ class Articles extends MainController
         $listCategories = $data['categories'] ?? [];
 
         //check data
-        $erreurs = self::checkDataArticle($title, $slug, $content, Categories::getAll(), $listCategories, false );
+        $erreurs = self::checkDataArticle($title, $slug, $content, Categories::getAll(), $listCategories);
+        $checkSlug = self::checkSlugExist($slug);
 
-        echo "traitement ";
+        //check slug
+        if (isset($checkSlug["id"]) && $checkSlug["id"] !== $oldData["id"]) $erreurs['slug'] = "ce slug existe déja pour un autre article";
 
-        die;
+        //check image
+        if (!empty($_FILES['image']["name"])) {
+            //check image
+            $checkImg = self::checkImage('image', 'FULL');
+            if ($checkImg !== true) $erreurs['file'] = $checkImg;
+        }
+
+        //check error
+        if (!empty($erreurs)) return [
+            "process" => false,
+            "message" => "ERROR",
+            "erreurs" => (object )$erreurs,
+        ];
+
+        if (!empty($_FILES['image']["name"])) {
+            // Save the Full image
+            $saveFullImage = self::saveImage('image', Config::PATCH_IMG_FULL, 'FULL');
+            $fullImageName = $saveFullImage['fileName'];
+
+            // Save the SQUARE image if the full image was successfully saved
+            $saveSquareImage = isset($saveFullImage["error"]) ? $saveFullImage : self::saveImage('image', Config::PATCH_IMG_SQUARE, 'SQUARE', $fullImageName);
+
+            // Check if error is set
+            if (isset($saveFullImage["error"]) || isset($saveSquareImage["error"])) return [
+                "process" => false,
+                "message" => "ERROR",
+                "erreurs" => (object)[
+                    "autre" => $saveSquareImage['error'] ?? $saveFullImage['error']
+                ],
+            ];
+
+            //delete old image
+            try {
+                unlink('.' . Config::PATCH_IMG_FULL . $data["file"]);
+                unlink('.' . Config::PATCH_IMG_SQUARE . $data["file"]);
+            } catch (Exception $exception) {
+                //log errir on  file error php
+                error_log('unilik impossible' . __DIR__ . Config::PATCH_IMG_FULL . $data["file"]);
+            }
+
+        } else {
+            $fullImageName = $oldData["image"];
+        }
+
+        //insert data on db if all is OK
+        $db = Db::getDb();
+        $query = "UPDATE `articles` set  
+                      title = :title,
+                      content= :content,
+                      image = :image,
+                      slug = :slug 
+                        WHERE id = :idArticle";
+        $req = $db->prepare($query);
+        $req->bindParam(':title', $title, PDO::PARAM_STR);
+        $req->bindParam(':content', $content, PDO::PARAM_STR);
+        $req->bindParam(':image', $fullImageName, PDO::PARAM_STR);
+        $req->bindParam(':slug', $slug, PDO::PARAM_STR);
+        $req->bindParam(':idArticle', $oldData['id'], PDO::PARAM_STR);
+
+        //Insert article
+        if (!$req->execute()) return [
+            'process' => false,
+            'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
+        ];
+
+        $oldCats = explode(',', $oldData["idCats"]) ?? [];
+
+        //List of cats to add
+        $catsToAdd = array_diff($listCategories, $oldCats);
+
+        //liste of cats to  remove
+        $catsToRemove = array_diff($oldCats, $listCategories);
+
+        //set new setArticleCategories
+        $responseSetCat = Categories::setArticleCategories($catsToAdd, $oldData['id']);
+
+        $responseUnSetCat = (!$responseSetCat) ? $responseSetCat : Categories::unSetArticleCategories($catsToRemove, $oldData['id']);
+
+        if (!$responseUnSetCat) return [
+            'process' => false,
+            'message' => $responseUnSetCat,
+        ];
+
+        return [
+            'process' => true,
+            'message' => $responseUnSetCat,
+        ];
+
     }
 
     /**
@@ -286,12 +378,16 @@ class Articles extends MainController
 
         //check data
         $checkSlug = ($action === 'UPDATE') ? false : true;
-        $erreurs = self::checkDataArticle($title, $slug, $content, $categories, $listCategories, $checkSlug);
+        $erreurs = self::checkDataArticle($title, $slug, $content, $categories, $listCategories);
+
+        //check slug
+        $checkSlug = self::checkSlugExist($slug);
+        if (isset($checkSlug["id"])) $erreurs['slug'] = "ce slug existe déja pour un autre article";
 
         //check image
         $checkImg = self::checkImage('image', 'FULL');
         if ($checkImg !== true) $erreurs['file'] = $checkImg;
-
+        //if errors
         if (!empty($erreurs)) return [
             "process" => false,
             "message" => "ERROR",
@@ -334,32 +430,17 @@ class Articles extends MainController
 
         //get lats id
         $idArticle = $db->lastInsertId();
-
-        //insert list of car
-        try {
-            $qInsertCat = "INSERT INTO article_categories (article_id, categorie_id) VALUES (:article_id, :categorie_id)";
-            //start transaction
-            $db->beginTransaction();
-            $req = $db->prepare($qInsertCat);
-            // bind value and execute query
-            foreach ($listCategories as $idCat) {
-                $req->bindParam(':article_id', $idArticle, PDO::PARAM_INT);
-                $req->bindParam(':categorie_id', $idCat, PDO::PARAM_INT);
-                $req->execute();
-            }
-            // end transaction
-            $db->commit();
-            return [
-                'process' => true,
-                'message' => 'L\'article a bien été créé.'
-            ];
-        } catch (PDOException $error) {
-            return [
-                'process' => false,
-                'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
-            ];
-        }
         $req->closeCursor();
+
+        //set new setArticleCategories
+        $responseSetCat = Categories::setArticleCategories($listCategories, $idArticle);
+        return !$responseSetCat ? [
+            'process' => false,
+            'message' => 'Impossible de ajouter les categories, veuillez réessayer ultérieurement.',
+        ] : [
+            'process' => true,
+        ];
+
     }
 
     /**
@@ -369,7 +450,7 @@ class Articles extends MainController
      * @param array $categories
      * @return array
      */
-    private static function checkDataArticle(string $title, string $slug, string $content, array $categories, array $listCats, bool $checkSlug = true): array
+    private static function checkDataArticle(string $title, string $slug, string $content, array $categories, array $listCats): array
     {
         //tableau d'erreur
         $erreurs = [];
@@ -380,15 +461,6 @@ class Articles extends MainController
         //on vérifie que le slug  n'est pas vide
         if (empty($slug) || strlen($slug) < 10)
             $erreurs['slug'] = 'Le champ slug est obligatoire: minimum de 50 characters ';
-
-        //if user ask to check slug
-        if ($checkSlug) {
-            $check = self::checkSlugExist($slug);
-            //if error
-            if (is_string($check)) $erreurs['autre'] = $check;
-            // if slug existe
-            if ($check === true) $erreurs["slug"] = "le slug existe déja";
-        }
 
         //on vérifie que le contenu n'est pas vide
         if (empty($content) || strlen($content) < 200)
@@ -418,17 +490,17 @@ class Articles extends MainController
     /**
      * Methode to check if slug existe on table article
      * @param string $slug
-     * @return bool|string true if exist , false if no , error message if sql query wrong
+     * @return array|string array if exist , error message if sql query wrong
      */
-    private static function checkSlugExist(string $slug): bool|string
+    private static function checkSlugExist(string $slug): array|string
     {
         $db = Db::getDb();
-        $query = "SELECT slug FROM articles WHERE slug = :slug LIMIT 1";
+        $query = "SELECT slug , id FROM articles WHERE slug = :slug LIMIT 1";
         $req = $db->prepare($query);
         $slug = strtolower($slug);
         $req->bindParam(":slug", $slug);
         if (!$req->execute()) return "une erreur est survenue lors de la vérification du slug ";
-        return !($req->rowCount() <= 0);
+        return $req->fetch();
     }
 
 }
