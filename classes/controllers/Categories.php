@@ -21,6 +21,7 @@ class Categories extends MainController
 
         //get number of page in url
         $nPage = Routes::getParams()[2] ?? 1;
+        $nPage = is_numeric($nPage) ? $nPage : 1 ;
 
         //check  params
         if (empty($this->categorie)) {
@@ -29,15 +30,13 @@ class Categories extends MainController
             ]);
             die;
         }
-
         //get data
-        $data = Articles::getAllByCategorie($this->categorie, $nPage, 6);
+        $data = Articles::getAllByCategorie($this->categorie , $nPage, 6);
 
         //check data
-//        $view = (!empty($data["articles"])) ? "categories" : "notFound";
-        $title = (isset($data["articles"][0]->title)) ? $data["articles"][0]->title : htmlspecialchars($this->categorie);
+//        $title = (isset($data["articles"][0]->title)) ? '$data["articles"][0]->title' : htmlspecialchars($this->categorie);
         MainController::render("categories", [
-            "title" => "{$title} | Daily Movies",
+            "title" => "Liste des article dans la catégorie ".htmlspecialchars($this->categorie)." | Daily Movies",
             "items" => $data
         ]);
     }

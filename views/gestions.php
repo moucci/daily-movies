@@ -16,15 +16,9 @@ $articles = $articles['articles'];
 if (isset(Routes::getParams()[2])) {
     $edit = Articles::getById(Routes::getParams()[2]);
     $edit = $edit['article'];
-    // echo '<pre>';
-    // var_dump($edit);
-    // echo '</pre>';
 }
 
-
-
 $erreurs = [];
-
 
 if (!empty($_POST)) :
 
@@ -38,22 +32,12 @@ if (!empty($_POST)) :
         $erreurs['content'] = 'Le champ contenu est obligatoire.';
     }
 
-
-
-
-
-
-
     // on vérifie si la catégorie est vide
-
     if (empty($_POST['categories'])) {
         $erreurs['categories'] = 'Le champ catégorie est obligatoire.';
     }
 
-
-
     //on traite l'image
-
     if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
         $image = $_FILES['image'];
 
@@ -64,7 +48,6 @@ if (!empty($_POST)) :
     } else {
         $reponseimage['message_erreur'] = 'Le champ image est obligatoire.';
     }
-
 
 
     if (isset($_POST['title']) && empty($erreurs) && $reponseimage['process'] == true) :
@@ -99,10 +82,7 @@ if (!empty($_POST)) :
         if ($messagearticle['process'] == false && file_exists((__DIR__ . '../../public/assets/images/square/' . $nomimage))) {
             unlink(__DIR__ . '../../public/assets/images/square/' . $nomimage);
         }
-
-
     endif;
-
 
     if (empty($_POST['addcat'])) {
         $erreurs['addcat'] = 'Le champ est obligatoire';
@@ -221,16 +201,11 @@ endif;
 
 
 <section>
-
-
     <?php if (isset(Routes::getParams()[1]) && Routes::getParams()[1] == 'new') : ?>
-
         <!-- formulaire de création d'un article -->
         <form class="border rounded p-2 position-relative m-auto mt-5" style="max-width: 80vw;" method="POST" enctype="multipart/form-data">
 
             <div class="d-flex flex-column">
-
-
                 <?php if (isset($erreurs['title'])) : ?>
                     <span class="text-danger"><?= $erreurs['title'] ?></span>
                 <?php endif; ?>
@@ -294,13 +269,6 @@ endif;
         </form>
 
         <a href="/gestions">Revenir à la page gestion</a>
-
-
-
-
-
-
-
 
     <?php elseif (isset(Routes::getParams()[1]) && Routes::getParams()[1] == 'categorie') : ?>
 
@@ -366,7 +334,6 @@ endif;
 
     <?php elseif (isset(Routes::getParams()[1]) && Routes::getParams()[1] == 'edit' && !empty(Routes::getParams()[2])) : ?>
 
-
         <form class="border rounded p-2 position-relative m-auto mt-5" style="max-width: 60vw;" method="POST" enctype="multipart/form-data">
 
             <div class="d-flex flex-column">
@@ -413,20 +380,7 @@ endif;
         <?php
         ?>
 
-
-
-
-
-
-
-
-
-
-
-
-
-    <?php else : ?>
-
+    <?php endif; : ?>
         <button class="mt-2 text-center border border-secondary rounded-pill">
             <a href="gestions/new" class="mb-0 p-2">Créer un article
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
@@ -435,10 +389,6 @@ endif;
                 </svg>
             </a>
         </button>
-
-
-
-
         <main class="d-flex flex-wrap-reverse flex-row-reverse justify-content-center mt-5">
             <?php
             foreach ($articles as $article) :
@@ -461,8 +411,6 @@ endif;
                         </p>
 
                         <a href="gestions/edit/<?= $article->id ?>" class="btn btn-primary">Editer</a>
-
-
                     </div>
                 </article>
 
@@ -471,7 +419,6 @@ endif;
             ?>
 
         </main>
-
     <?php endif; ?>
 
 </section>

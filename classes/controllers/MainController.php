@@ -26,7 +26,9 @@ class MainController extends Core
      */
     public function notFound(): void
     {
-        $this->render('notFound');
+        $this->render('notFound',[
+            'title' => "Page introuvable | Daily Movies"
+        ]);
     }
 
     /**

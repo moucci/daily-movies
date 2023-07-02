@@ -2,6 +2,7 @@
 
 namespace classes\controllers;
 
+use classes\controllers\Articles;
 use classes\Core;
 use classes\Routes;
 use PDO;
@@ -11,308 +12,130 @@ class Gestions extends MainController
 {
     public function __construct()
     {
-
-        // Core::var_dump_pre(Routes::getParams()) ;
-        Routes::getParams();
-        MainController::render("gestions");
-    }
-
-
-    /**
-     * $db objest 
-     * user_id string -> l'id user
-     * $title string  -> le titre
-     * $content string -> le contenu
-     * $image string -> le nom de l'image
-     */
-    public static function addarticle(object $db, int $user_id, string $title, string $content, string $image)
-    {
-        $query = "INSERT INTO `articles` (user_id, title, content, image, slug) VALUES (:user_id, :title, :content, :image, :slug)";
-
-        $req = $db->prepare($query);
-
-
-        $req->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $req->bindParam(':title', $title, PDO::PARAM_STR);
-        $req->bindParam(':content', $content, PDO::PARAM_STR);
-        $req->bindParam(':image', $image, PDO::PARAM_STR);
-
-        $slug = Gestions::slugify($title);
-        $req->bindParam(':slug', $slug, PDO::PARAM_STR);
-
-        try {
-            $req->execute();
-            return [
-                'process' => true,
-                'message' => 'L\'article a bien été créé.'
-            ];
-        } catch (PDOException $error) {
-            return [
-                'process' => false,
-                'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
-            ];
-        }
-
-        $req->closeCursor();
-    }
-
-
-    /**
-     * création d'une image 16:9
-     */
-    public static function addimagefull()
-    {
-
-        $image = $_FILES['image'];
-
-
-
-        // on vérifie l'extension et le type Mime
-        $allowed = [
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-        ];
-
-        $filename = $image['name'];
-        $filetype = $image['type'];
-        $filesize = $image['size'];
-
-
-
-
-
-        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-
-        if (!array_key_exists($extension, $allowed) || !in_array($filetype, $allowed)) {
-            //$erreurs['image'] = 'Format de fichier incorrect.';
-            return [
-                "process" => false,
-
-                "message_erreur" => "Format de fichier incorrect.",
-            ];
-        }
-
-        //on limite à 1 Mio
-        if ($filesize > 1024 * 1024) {
-        }
-
-
-
-        $newfilename = $image['tmp_name'];
-        //on génère un nom unique
-        $newname = md5(uniqid());
-
-        $newname2 = "$newname.$extension";
-
-        chmod($newfilename, 0644);
-
-        $dimension = getimagesize($newfilename);
-
-        $largeur = $dimension[0];
-        $hauteur = $dimension[1];
-
-
-        switch ($dimension['mime']) {
-            case 'image/png':
-                $imagesource = imagecreatefrompng($newfilename);
+        // Get route
+        $route = Routes::getParams()[1] ?? '';
+        switch (strtolower($route)) {
+            case "edit":
+                $this->editArticle();
                 break;
-
-            case 'image/jpeg':
-                $imagesource = imagecreatefromjpeg($newfilename);
+            case "new":
+                $this->newArticle() ;
                 break;
-
             default:
-                return [
-                    "process" => false,
-
-                    "message_erreur" => "un truc qui va pas",
-                ];
+                // Get number of page in URL
+                $nPage = (isset(Routes::getParams()[1]) && is_numeric(Routes::getParams()[1])) ? Routes::getParams()[1] : 1;
+                // Render the view for managing articles
+                MainController::render("gestions.articles", [
+                    "title" => "Modifier les articles | Daily Movies",
+                    "items" => Articles::getAll($nPage, 4)
+                ]);
+                die;
                 break;
         }
-
-
-        $fullimage = imagecreatetruecolor($largeur, intval(9 * 100 / 16 * $largeur / 100));
-        $taille = intval(((100 - (($hauteur * 100) / $largeur)) / 2) * $largeur / 100);
-
-        imagecopyresampled(
-            $fullimage,
-            $imagesource,
-            0,
-            0,
-            0,
-            $taille,
-            $largeur,
-            $hauteur,
-            $largeur,
-            $hauteur,
-        );
-
-
-        switch ($dimension['mime']) {
-            case 'image/png':
-                imagepng($fullimage, "./public/assets/images/full/$newname.$extension");
-                break;
-
-            case 'image/jpeg':
-                imagejpeg($fullimage, "./public/assets/images/full/$newname.$extension");
-
-                break;
-        }
-
-        imagedestroy($imagesource);
-        imagedestroy($fullimage);
-
-
-        return [
-            "process" => true,
-
-            "name_img" => $newname2,
-        ];
     }
 
+
     /**
-     * création d'une image carré
-     * $name le nom généré avec unique id dans la fonction addimagefull
+     * Route new article
+     * @return void
      */
-    public static function addimagesquare($name)
-    {
+    private    function  newArticle(){
+        // Add a new article
+        $articleResponse = Articles::addArticle($_POST);
+        if ($articleResponse['process']) {
+            header('Location: /gestions');
+        } else {
+            // Render the view with the response
+            MainController::render('gestions.add', [
+                "title" => "Ajouter un article | Daily Movies",
+                "response" => $articleResponse
+            ]);
+        }
+        die;
+    }
 
-        $image = $_FILES['image'];
+    /**
+     * Route edit Article
+     * @return void|null
+     */
+    private   function  editArticle(){
 
 
+        // Get the article ID from the URL parameters
+        $idArticle = Routes::getParams()[2] ?? null;
 
-        // on vérifie l'extension et le type Mime
-        $allowed = [
-            'jpg' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'png' => 'image/png',
-        ];
-
-        $filename = $image['name'];
-        $filetype = $image['type'];
-        $filesize = $image['size'];
-
-
-
-
-
-        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-
-        if (!array_key_exists($extension, $allowed) || !in_array($filetype, $allowed)) {
-            //$erreurs['image'] = 'Format de fichier incorrect.';
-            return [
-                "process" => false,
-
-                "message_erreur" => "Format de fichier incorrect.",
-            ];
+        // Check if the article ID is numeric
+        if (!is_numeric($idArticle)) {
+            return header('Location: /gestions');
         }
 
-        //on limite à 1 Mio
-        if ($filesize > 1024 * 1024) {
+        // Get the article data by ID
+        $articleUpdateResponse = Articles::getById($idArticle);
+
+        // Check if the article exists
+        if (!$articleUpdateResponse['article']->title) {
+            return header('Location: /notFound');
         }
 
+        // get categoroe in  allowed
+        $categories = Categories::getAll() ;
+
+        // Get the list of categories for the article
+        $listCats = explode(',', $articleUpdateResponse['article']->idCats);
 
 
 
-        $newfilename = $image['tmp_name'];
+        // Check if $_POST is empty
+        if (empty($_POST)) {
+            $_POST['categories'] = $listCats;
+            // Set $_POST with the article data for updating
+            $_POST["title"] = $articleUpdateResponse['article']->title;
+            $_POST["slug"] = $articleUpdateResponse['article']->slug;
+            $_POST["content"] = $articleUpdateResponse['article']->content;
+            $_POST["file"] = $articleUpdateResponse['article']->image;
+            $_POST["edit"] = true;
 
+            //add catergorie to response
+            $articleUpdateResponse["categories"] = $categories ;
 
-
-        chmod($newfilename, 0644);
-
-        $dimension = getimagesize($newfilename);
-
-        $largeur = $dimension[0];
-        $hauteur = $dimension[1];
-
-
-        switch ($dimension['mime']) {
-            case 'image/png':
-                $imagesource = imagecreatefrompng($newfilename);
-                break;
-
-            case 'image/jpeg':
-                $imagesource = imagecreatefromjpeg($newfilename);
-                break;
-
-            default:
-                return [
-                    "process" => false,
-
-                    "message_erreur" => "un truc qui va pas",
-                ];
-                break;
-        }
-
-        if ($largeur <= $hauteur) {
-            $nouvelleimage = imagecreatetruecolor($largeur, $largeur);
-            $taille = intval(((100 - (($largeur * 100) / $hauteur)) / 2) * $hauteur / 100);
-
-            imagecopyresampled(
-                $nouvelleimage,
-                $imagesource,
-                0,
-                0,
-                0,
-                $taille,
-                $largeur,
-                $hauteur,
-                $largeur,
-                $hauteur,
-            );
-        }
-
-        if ($largeur > $hauteur) {
-            $nouvelleimage = imagecreatetruecolor($hauteur, $hauteur);
-            $taille = intval(((100 - (($hauteur * 100) / $largeur)) / 2) * $largeur / 100);
-
-            imagecopyresampled(
-                $nouvelleimage,
-                $imagesource,
-                0,
-                0,
-                $taille,
-                0,
-                $largeur,
-                $hauteur,
-                $largeur,
-                $hauteur,
-            );
+            // Render the view with the response
+            MainController::render('gestions.add', [
+                "title" => "Mettre à jour  un article | Daily Movies",
+                "response" => $articleUpdateResponse,
+            ]);
+            die();
         }
 
 
-        switch ($dimension['mime']) {
-            case 'image/png':
-                imagepng($nouvelleimage, "./public/assets/images/square/$name");
-                break;
 
-            case 'image/jpeg':
-                imagejpeg($nouvelleimage, "./public/assets/images/square/$name");
+        // Update the article
+        $articleUpdateResponse = Articles::updateArticle($_POST , $idArticle);
 
-                break;
+        if ($articleUpdateResponse['process']) {
+            header('Location: /article/'.$idArticle);
+        } else {
+            //add catergorie to response
+            $articleUpdateResponse["categories"] = $categories ;
+            // Render the view with the response
+            MainController::render('gestions.add', [
+                "title" => "Ajouter un article | Daily Movies",
+                "response" => $articleUpdateResponse
+            ]);
+            die;
         }
 
-        imagedestroy($imagesource);
-        imagedestroy($nouvelleimage);
-
-
-        return [
-            "process" => true,
-
-            "name_img" => $name,
-        ];
     }
 
 
     /**
-     * $db object 
+     * $db object
      * $user_id string -> l'id user
      * $title string  -> le titre
      * $content string -> le contenu
      * $image string -> le nom de l'image
      * $idcategorie int -> l'id de la catégorie
      */
+
     public static function addcategorie(object $db, int $user_id, string $title, string $content, string $image, int $idcategorie)
     {
 
@@ -364,9 +187,8 @@ class Gestions extends MainController
     }
 
 
-
     /**
-     * $db object 
+     * $db object
      * $name le nom de la catégorie que l'on veut créer
      */
     public static function createcategorie(object $db, string $name)
@@ -428,9 +250,9 @@ class Gestions extends MainController
     /**
      * $db -> object
      * $img -> la nouvelle image
-     * $idarticle -> l'id de l'article 
+     * $idarticle -> l'id de l'article
      */
-    public static function modifimg (object $db, string $img, int $idarticle)
+    public static function modifimg(object $db, string $img, int $idarticle)
     {
         $query = "UPDATE `articles` SET `image` = :img WHERE `id` = :id";
 
@@ -458,9 +280,9 @@ class Gestions extends MainController
     /**
      * $db -> object
      * $modiftitle -> le nouveau titre
-     * $idarticle -> l'id de l'article 
+     * $idarticle -> l'id de l'article
      */
-    public static function modiftitle (object $db, string $modiftitle, int $idarticle)
+    public static function modiftitle(object $db, string $modiftitle, int $idarticle)
     {
         $query = "UPDATE `articles` SET `title` = :title WHERE `id` = :id";
 
@@ -488,9 +310,9 @@ class Gestions extends MainController
     /**
      * $db -> object
      * $modifcontent -> le nouveau titre
-     * $idarticle -> l'id de l'article 
+     * $idarticle -> l'id de l'article
      */
-    public static function modifcontent (object $db, string $modifcontent, int $idarticle)
+    public static function modifcontent(object $db, string $modifcontent, int $idarticle)
     {
         $query = "UPDATE `articles` SET `content` = :content WHERE `id` = :id";
 
@@ -513,4 +335,5 @@ class Gestions extends MainController
             ];
         }
     }
+
 }

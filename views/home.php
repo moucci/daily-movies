@@ -11,6 +11,7 @@ use classes\Routes ;
 //get number of page
 $nPage = (int) (Routes::getParams()[1] ?? 1 ) ;
 
+
 ?>
 
 <section id="home-slide">
@@ -39,22 +40,21 @@ $nPage = (int) (Routes::getParams()[1] ?? 1 ) ;
         <button class="carousel-control-prev" type="button" data-bs-target="#daily-movies-slider"
                 data-bs-slide="prev">
             <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
         </button>
         <button class="carousel-control-next" type="button" data-bs-target="#daily-movies-slider"
                 data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
+            <span  class=" carousel-control-next-icon " aria-hidden="true"></span>
         </button>
     </div>
 
-    <div class="  container-fluid mt-5">
+    <div class="  container-fluid ">
+        <h2 class="h2 m-5 text-center text-uppercase fw-bold">Actualité</h2>
         <div class="row gx-3">
             <?php foreach (array_slice($data->items["articles"], 3, 4) as $key => $article): ?>
                 <div class="col-lg-3 col-md-4 col-sm-6">
                     <article class="card mb-5  ">
                         <a href="/article/<?= $article->id . '/' . $article->slug ?>">
-                            <img src="<?= Config::PATCH_IMG_FULL . $article->image ?>" class="d-block w-100" alt="...">
+                            <img src="<?= Config::PATCH_IMG_SQUARE . $article->image ?>" class="d-block w-100" alt="...">
                         </a>
                         <div class="card-body">
                             <h4 class="card-title fst-italic   text-capitalize">
@@ -68,7 +68,7 @@ $nPage = (int) (Routes::getParams()[1] ?? 1 ) ;
                                 <?= substr($article->content, 0, 255) ?>...</p>
                         </div>
                         <div class="d-flex text-capitalize px-3  justify-content-between align-items-baseline">
-                            <p class=""> <?= $article->nom ?> <?= $article->prenom ?></p>
+                            <p class="">Par :  <?= $article->nom ?> <?= $article->prenom ?></p>
 
                             <p class=" fs-7 fw-light"> Créé le : <?= $article->date_creation ?></p>
 

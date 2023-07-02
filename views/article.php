@@ -7,15 +7,13 @@ use classes\Config;
  */
 
 ?>
-<section>
-    <div class="container mt-5">
+<section class="mb-5">
+    <div class="container ">
         <div class="row">
             <div class="col">
-                <img src="<?= Config::PATCH_IMG_FULL . $data->article->image ?>" class="float-start  xl-50 me-3 mb-3 rounded img-fluid"  alt="...">
                 <h1 class="m-5 text-center"><?= $data->article->title ?></h1>
-                <p><?= $data->article->content ?>
-                    <?= $data->article->content ?><?= $data->article->content ?>
-                </p>
+                <img src="<?= Config::PATCH_IMG_FULL . $data->article->image ?>" class="float-start  xl-50 me-3 mb-3 rounded img-fluid"  alt="...">
+                <p><?= $data->article->content ?></p>
             </div>
         </div>
     </div>
