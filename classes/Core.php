@@ -241,4 +241,20 @@ class Core
     }
 
 
+    public static function checkSlug($slug): bool|string
+    {
+        //check size
+        if (empty($slug) && (strlen($slug) < 2 || strlen($slug) > 50)) {
+            return "Le slug doit faire au minimum de 2 caractères et au maximum 50 caractères.";
+        };
+
+        //check format
+        if (!preg_match('/^[a-zA-Z0-9-]+$/', $slug)) {
+            return "Le slug doit uniquement contenir des caractères en minuscules et des tirets (-).";
+        }
+
+        return true ;
+
+    }
+
 }

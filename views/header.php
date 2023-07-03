@@ -41,7 +41,7 @@
                                  aria-labelledby="navbarDropdown">
                                 <?php for ($i = 6; $i < count($listCats); $i++): ?>
                                     <a class="dropdown-item text-capitalize font-weight-bold"
-                                       href="<?= $listCats[$i]->slug ?>"><?= $listCats[$i]->name ?></a>
+                                       href="/categories/<?= $listCats[$i]->slug ?>"><?= $listCats[$i]->name ?></a>
                                 <?php endfor; ?>
                             </div>
                         </li>

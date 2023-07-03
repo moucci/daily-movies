@@ -71,7 +71,7 @@ if (isset($_POST['file'])):?>
             <?php if (isset($data->response["erreurs"]->categories)) : ?>
                 <span class="text-danger"><?= $data->response["erreurs"]->categories ?></span>
             <?php endif; ?>
-            <fieldset>
+            <fieldset class="d-block my-3">
                 <label class="fw-bold fs-5" for="categories ">Ajouter une catégorie </label>
                 <?php foreach ($data->response["categories"] as $categorie) : ?>
                     <div class="d-inline-block mb-2">
@@ -83,18 +83,14 @@ if (isset($_POST['file'])):?>
                                for="check-<?= $categorie->id ?>"><?= $categorie->name ?></label>
                     </div>
                 <?php endforeach; ?>
-                <a class="btn btn-outline-dark fw-bold " href="/gestions/add-categorie"><i
+                <a class="btn btn-outline-dark fw-bold " href="/gestions/categories"><i
                             class="bi bi-patch-plus  me-2"></i>Ajouter une catégorie</a>
             </fieldset>
 
 
         </div>
 
-
         <div>
-            <?php if (isset($reponseimage['message_erreur'])) : ?>
-                <span class="text-danger"><?= $reponseimage['message_erreur'] ?></span>
-            <?php endif; ?>
 
             <?php if (isset($erreurs['autre'])) : ?>
                 <span class="text-danger"><?= $erreurs['autre'] ?></span>
@@ -138,9 +134,15 @@ if (isset($_POST['file'])):?>
                     {model: 'heading1', view: 'h1', title: 'Heading 1', class: 'ck-heading_heading1'},
                     {model: 'heading2', view: 'h2', title: 'Heading 2', class: 'ck-heading_heading2'}
                 ]
-            }
+            },
+            entities: false,
+            basicEntities: false,
+            entities_greek: false,
+            entities_latin: false,
         })
         .catch(error => {
             console.error(error);
         });
+
+    console.log(ClassicEditor)
 </script>

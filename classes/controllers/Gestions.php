@@ -129,145 +129,51 @@ class Gestions extends MainController
     }
 
 
-    private function newCategories(){
+    private function newCategories()
+    {
 
         // Check if $_POST is empty
         if (empty($_POST)) {
-            MainController::render('gestions.categories' , [
-                "title"=> "Ajouter ou supprimer une categorie | Daily Movies ",
+            MainController::render('gestions.categories', [
+                "title" => "Ajouter ou supprimer une categorie | Daily Movies ",
                 "categories" => Categories::getAll()
             ]);
-        }else{
-            MainController::render('gestions.categories' , [
-                "title"=> "Ajouter ou supprimer une categorie | Daily Movies ",
-                "categories" => Categories::getAll()
-            ]);
+
+            die;
         }
+
+
+        // try to remove  cats if  had cats
+        $removeCatProcess = !empty($_POST['categories']) ?
+            Categories::delete($_POST['categories']) : [] ;
+
+        // try to add categorie if no empty
+        $addCatProcess = (!empty($_POST['slug']) || !empty($_POST['name'])) ?
+            Categories::add($_POST['name'] ?? '', $_POST['slug'] ?? '') : [] ;
+
+        //reste $_post variable
+        if($addCatProcess === true){
+            $_POST["name"] = null ;
+            $_POST["slug"] = null ;
+        }
+
+        $errors = [] ;
+        $errors = is_array($addCatProcess) ? array_merge($errors, $addCatProcess) : [];
+        $errors = is_array($removeCatProcess) ? array_merge($errors, $removeCatProcess) : [];
+
+        // Render the view with the response
+        MainController::render('gestions.categories', [
+            "title" => "Ajouter ou supprimer une catégorie | Daily Movies ",
+            "categories" => Categories::getAll(),
+            "response" => [
+                "erreurs" => (object)$errors,
+                "process" => (object)[
+                    'add' => is_bool($addCatProcess) && $addCatProcess,
+                    'remove' => is_bool($removeCatProcess) &&  $removeCatProcess ,
+                ]
+            ]
+        ]);;
 
 
     }
-
-
-
-    /**
-     * $db object
-     * $user_id string -> l'id user
-     * $title string  -> le titre
-     * $content string -> le contenu
-     * $image string -> le nom de l'image
-     * $idcategorie int -> l'id de la catégorie
-     */
-
-    public static function addcategorie(object $db, int $user_id, string $title, string $content, string $image, int $idcategorie)
-    {
-
-        //on récupère l'id de l'article
-        $query = "SELECT * FROM `articles` WHERE `user_id` = :user_id AND `title` = :title AND `content` = :content AND `image` = :image";
-
-        $req = $db->prepare($query);
-
-
-        $req->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $req->bindParam(':title', $title, PDO::PARAM_STR);
-        $req->bindParam(':content', $content, PDO::PARAM_STR);
-        $req->bindParam(':image', $image, PDO::PARAM_STR);
-
-        try {
-            $req->execute();
-        } catch (PDOException $error) {
-            return [
-                'process' => false,
-                'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
-            ];
-        }
-
-        $articleid = $req->fetch(PDO::FETCH_ASSOC);
-
-        //l'ajout dans article_categories
-        $query = "INSERT INTO `article_categories` (article_id, categorie_id) VALUES (:articleid, :idcategorie)";
-
-        $req = $db->prepare($query);
-
-
-        $req->bindParam(':articleid', $articleid['id'], PDO::PARAM_INT);
-        $req->bindParam(':idcategorie', $idcategorie, PDO::PARAM_INT);
-
-        try {
-            $req->execute();
-            return [
-                'process' => true,
-            ];
-        } catch (PDOException $error) {
-            return [
-                'process' => false,
-                'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
-            ];
-        }
-
-
-        $req->closeCursor();
-    }
-
-
-    /**
-     * $db object
-     * $name le nom de la catégorie que l'on veut créer
-     */
-    public static function createcategorie(object $db, string $name)
-    {
-
-        $query = "INSERT INTO `categories` (name, slug) VALUES (:name, :slug)";
-
-        $req = $db->prepare($query);
-
-        $req->bindParam(':name', $name, PDO::PARAM_STR);
-
-        $slug = Gestions::slugify($name);
-        $req->bindParam(':slug', $slug, PDO::PARAM_STR);
-
-        try {
-            $req->execute();
-            return [
-                'process' => true,
-                'message' => 'La catégorie a bien été ajoutée.',
-            ];
-        } catch (PDOException $error) {
-            return [
-                'process' => false,
-                'message' => 'Une erreur est survenue, veuillez réessayer ultérieurement.',
-            ];
-        }
-
-        $req->closeCursor();
-    }
-
-    public static function slugify($text, string $divider = '-')
-    {
-        // replace non letter or digits by divider
-        $text = preg_replace('~[^\pL\d]+~u', $divider, $text);
-
-        // transliterate
-        $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
-
-        // remove unwanted characters
-        $text = preg_replace('~[^-\w]+~', '', $text);
-
-        // trim
-        $text = trim($text, $divider);
-
-        // remove duplicate divider
-        $text = preg_replace('~-+~', $divider, $text);
-
-        // lowercase
-        $text = strtolower($text);
-
-        if (empty($text)) {
-            return 'n-a';
-        }
-
-        return $text;
-    }
-
-
-
 }

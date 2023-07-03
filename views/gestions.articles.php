@@ -21,7 +21,7 @@ $nPage = (int)(Routes::getParams()[1] ?? 1);
     <div class="container-fluid bg-dark">
         <div class="container  text-md-start ">
             <a href="/gestions/new" class="btn h6 m-3 fw-bold btn-light">Ajouter un article</a>
-            <a href="/gestions/categorie" class="btn h6 m-3 fw-bold btn-light">Ajouter une Catégorie</a>
+            <a href="/gestions/categories" class="btn h6 m-3 fw-bold btn-light">Ajouter une Catégorie</a>
         </div>
     </div>
     <h2 class="h2 m-5 text-center text-uppercase fw-bold">Listes des articles </h2>

@@ -37,6 +37,13 @@ $nPage = (int)(Routes::getParams()[1] ?? 1);
                         </h1>
                         <p class="fw-bold fs-3"
                            style="text-shadow: #000 0px 0 20px;"><?= substr($article->content, 0, 255) ?>...</p>
+
+                        <div class="d-flex text-capitalize px-3 gap-3  justify-content-center align-items-baseline">
+                            <p class="">Par : <?= $article->nom ?> <?= $article->prenom ?></p>
+
+                            <p class=" fs-7 fw-light"> Créé le : <?= $article->date_creation ?></p>
+
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -67,9 +74,8 @@ $nPage = (int)(Routes::getParams()[1] ?? 1);
                         <div class="card-body">
                             <a  aria-label="voirs l'article <?= $article->slug ?>" class="d-block card-title fst-italic   text-capitalizetext-decoration-none"
                                href="/article/<?= $article->id . '/' . $article->slug ?>">
-                                <?= $article->title ?>
+                                <?= substr($article->title, 0, 25) ?>...
                             </a>
-
 
                             <p class="card-text text-wrap fw-bold ">
                                 <?= substr($article->content, 0, 255) ?>...</p>

@@ -249,7 +249,7 @@ class Articles extends MainController
         $slug = $data['slug'] ?? '';
         $slug = trim($slug);
         $content = $data['content'] ?? '';
-        $content = trim($content);
+        $content = htmlspecialchars(trim($content));
         $listCategories = $data['categories'] ?? [];
 
         //check data
@@ -369,23 +369,23 @@ class Articles extends MainController
 
         //try to get data
         $title = $data['title'] ?? '';
-        $title = trim($title);
+        $title = strtolower(trim($title));
         $slug = $data['slug'] ?? '';
-        $slug = trim($slug);
+        $slug = strtolower(trim($slug));
         $content = $data['content'] ?? '';
         $content = trim($content);
         $listCategories = $data['categories'] ?? [];
 
         //check data
-        $checkSlug = ($action === 'UPDATE') ? false : true;
-        $erreurs = self::checkDataArticle($title, $slug, $content, $categories, $listCategories);
+        $checkSlug = !(($action === 'UPDATE'));
+        $erreurs = Articles::checkDataArticle($title, $slug, $content, $categories, $listCategories);
 
         //check slug
-        $checkSlug = self::checkSlugExist($slug);
+        $checkSlug = Articles::checkSlugExist($slug);
         if (isset($checkSlug["id"])) $erreurs['slug'] = "ce slug existe déja pour un autre article";
 
         //check image
-        $checkImg = self::checkImage('image', 'FULL');
+        $checkImg = Core::checkImage('image', 'FULL');
         if ($checkImg !== true) $erreurs['file'] = $checkImg;
         //if errors
         if (!empty($erreurs)) return [
@@ -456,15 +456,15 @@ class Articles extends MainController
         $erreurs = [];
         //on vérifie que le titre n'est pas vide
         if (empty($title) || strlen($title) < 10)
-            $erreurs['title'] = 'Le champ titre est obligatoire: minimum de 50 characters ';
+            $erreurs['title'] = 'Le champ titre est obligatoire: minimum de 10 characters ';
 
         //on vérifie que le slug  n'est pas vide
-        if (empty($slug) || strlen($slug) < 10)
-            $erreurs['slug'] = 'Le champ slug est obligatoire: minimum de 50 characters ';
+        $checkSlug = Core::checkSlug($slug);
+        if (!$checkSlug) $erreurs['slug'] = $slug;
 
         //on vérifie que le contenu n'est pas vide
         if (empty($content) || strlen($content) < 200)
-            $erreurs['content'] = 'Le champ contenu est obligatoire.';
+            $erreurs['content'] = 'Le champ contenu est obligatoire minimum 200 characters';
 
         // on vérifie si la catégorie est vide
         if (empty($listCats)) {
