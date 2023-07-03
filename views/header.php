@@ -26,7 +26,7 @@
                     for ($i = 0; $i < $count; $i++): ?>
                         <li class="nav-item d-flex align-items-center">
                             <a class="btn btn-dark text-capitalize font-weight-bold"
-                               href="<?= $listCats[$i]->slug ?>"><?= $listCats[$i]->name ?></a>
+                               href="/categories/<?= $listCats[$i]->slug ?>"><?= $listCats[$i]->name ?></a>
                         </li>
                     <?php endfor; ?>
 
